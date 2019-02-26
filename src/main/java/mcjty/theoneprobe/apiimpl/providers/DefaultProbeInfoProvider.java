@@ -10,6 +10,7 @@ import mcjty.theoneprobe.compat.RedstoneFluxTools;
 import mcjty.theoneprobe.compat.TeslaTools;
 import mcjty.theoneprobe.config.Config;
 import net.minecraft.block.*;
+import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,6 +30,8 @@ import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import static mcjty.theoneprobe.api.IProbeInfo.ENDLOC;
 import static mcjty.theoneprobe.api.IProbeInfo.STARTLOC;
 import static mcjty.theoneprobe.api.TextStyleClass.*;
+
+import java.util.Collections;
 
 public class DefaultProbeInfoProvider implements IProbeInfoProvider {
 
@@ -56,7 +59,7 @@ public class DefaultProbeInfoProvider implements IProbeInfoProvider {
         }
 
         if (Tools.show(mode, config.getShowCropPercentage())) {
-            showGrowthLevel(probeInfo, blockState, block);
+            showGrowthLevel(probeInfo, blockState);
         }
 
         boolean showHarvestLevel = Tools.show(mode, config.getShowHarvestLevel());
@@ -238,6 +241,7 @@ public class DefaultProbeInfoProvider implements IProbeInfoProvider {
         }
     }
 
+<<<<<<< HEAD
     private void showGrowthLevel(IProbeInfo probeInfo, IBlockState blockState, Block block) {
         if (block instanceof BlockCrops) {
             BlockCrops crops = (BlockCrops) block;
@@ -255,7 +259,22 @@ public class DefaultProbeInfoProvider implements IProbeInfoProvider {
                 probeInfo.text(I18n.format("gui.theoneprobe.default_provider.growth.full_grown", OK));
             } else {
                 probeInfo.text(I18n.format("gui.theoneprobe.default_provider.growth.growth", LABEL, WARNING, (age * 100) / maxAge));
+=======
+    private void showGrowthLevel(IProbeInfo probeInfo, IBlockState blockState) {
+        for (IProperty<?> property : blockState.getProperties().keySet()) {
+            if(!"age".equals(property.getName())) continue;
+            if(property.getValueClass() == Integer.class) {
+                IProperty<Integer> integerProperty = (IProperty<Integer>)property;
+                int age = blockState.getValue(integerProperty);
+                int maxAge = Collections.max(integerProperty.getAllowedValues());
+                if (age == maxAge) {
+                    probeInfo.text(OK + "Fully grown");
+                } else {
+                    probeInfo.text(LABEL + "Growth: " + WARNING + (age * 100) / maxAge + "%");
+                }
+>>>>>>> 75f0fe3ae31518ff4146258e9615aa1d72c4b8b3
             }
+            return;
         }
     }
 

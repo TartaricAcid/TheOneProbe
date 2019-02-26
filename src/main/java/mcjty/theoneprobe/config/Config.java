@@ -36,6 +36,7 @@ public class Config {
     public static NumberFormat tankFormat = NumberFormat.COMPACT;
     public static int timeout = 300;
     public static int waitingForServerTimeout = 2000;
+    public static int maxPacketToServer = 20000;
 
     public static boolean supportBaubles = true;
     public static boolean spawnNote = true;
@@ -45,8 +46,10 @@ public class Config {
     public static int showItemDetailThresshold = 4;
     public static String[] showContentsWithoutSneaking = { "storagedrawers:basicDrawers", "storagedrawersextra:extra_drawers" };
     public static String[] dontShowContentsUnlessSneaking = {};
+    public static String[] dontSendNBT = { };
     private static Set<ResourceLocation> inventoriesToShow = null;
     private static Set<ResourceLocation> inventoriesToNotShow = null;
+    private static Set<ResourceLocation> dontSendNBTSet = null;
 
     public static float probeDistance = 6;
     public static boolean showLiquids = false;
@@ -132,6 +135,7 @@ public class Config {
         tankFormat = NumberFormat.values()[fmt];
         timeout = cfg.getInt("timeout", CATEGORY_THEONEPROBE, timeout, 10, 100000, "The amount of milliseconds to wait before updating probe information from the server (this is a client-side config)");
         waitingForServerTimeout = cfg.getInt("waitingForServerTimeout", CATEGORY_THEONEPROBE, waitingForServerTimeout, -1, 100000, "The amount of milliseconds to wait before showing a 'fetch from server' info on the client (if the server is slow to respond) (-1 to disable this feature)");
+        maxPacketToServer = cfg.getInt("maxPacketToServer", CATEGORY_THEONEPROBE, maxPacketToServer, -1, 32768, "The maximum packet size to send an itemstack from client to server. Reduce this if you have issues with network lag caused by TOP");
         probeDistance = cfg.getFloat("probeDistance", CATEGORY_THEONEPROBE, probeDistance, 0.1f, 200f, "Distance at which the probe works");
         initDefaultConfig(cfg);
 
@@ -148,6 +152,7 @@ public class Config {
         showSmallChestContentsWithoutSneaking = cfg.getInt("showSmallChestContentsWithoutSneaking", CATEGORY_THEONEPROBE, showSmallChestContentsWithoutSneaking, 0, 1000, "The maximum amount of slots (empty or not) to show without sneaking");
         showContentsWithoutSneaking = cfg.getStringList("showContentsWithoutSneaking", CATEGORY_THEONEPROBE, showContentsWithoutSneaking, "A list of blocks for which we automatically show chest contents even if not sneaking");
         dontShowContentsUnlessSneaking = cfg.getStringList("dontShowContentsUnlessSneaking", CATEGORY_THEONEPROBE, dontShowContentsUnlessSneaking, "A list of blocks for which we don't show chest contents automatically except if sneaking");
+        dontSendNBT = cfg.getStringList("dontSendNBT", CATEGORY_THEONEPROBE, dontSendNBT, "A list of blocks for which we don't send NBT over the network. This is mostly useful for blocks that have HUGE NBT in their pickblock (itemstack)");
 
         setupStyleConfig(cfg);
     }
@@ -348,4 +353,15 @@ public class Config {
         }
         return inventoriesToNotShow;
     }
+
+    public static Set<ResourceLocation> getDontSendNBTSet() {
+        if (dontSendNBTSet == null) {
+            dontSendNBTSet = new HashSet<>();
+            for (String s : dontSendNBT) {
+                dontSendNBTSet.add(new ResourceLocation(s));
+            }
+        }
+        return dontSendNBTSet;
+    }
+
 }

@@ -1,6 +1,6 @@
 package mcjty.theoneprobe.rendering;
 
-    import mcjty.theoneprobe.TheOneProbe;
+import mcjty.theoneprobe.TheOneProbe;
 import mcjty.theoneprobe.api.*;
 import mcjty.theoneprobe.apiimpl.ProbeHitData;
 import mcjty.theoneprobe.apiimpl.ProbeHitEntityData;
@@ -327,6 +327,10 @@ public class OverlayRenderer {
         if (pickBlock == null || (!pickBlock.isEmpty() && pickBlock.getItem() == null)) {
             // Protection for some invalid items.
             pickBlock = ItemStack.EMPTY;
+        }
+        if (pickBlock != null && (!pickBlock.isEmpty()) && Config.getDontSendNBTSet().contains(pickBlock.getItem().getRegistryName())) {
+            pickBlock = pickBlock.copy();
+            pickBlock.setTagCompound(null);
         }
         PacketHandler.INSTANCE.sendToServer(new PacketGetInfo(world.provider.getDimension(), blockPos, mode, mouseOver, pickBlock));
     }

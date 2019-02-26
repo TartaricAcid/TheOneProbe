@@ -1,6 +1,7 @@
 package mcjty.theoneprobe.network;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import mcjty.theoneprobe.TheOneProbe;
 import mcjty.theoneprobe.api.*;
 import mcjty.theoneprobe.apiimpl.ProbeHitData;
@@ -18,6 +19,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -52,11 +54,7 @@ public class PacketGetInfo implements IMessage {
         if (buf.readBoolean()) {
             hitVec = new Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
         }
-        if (buf.readBoolean()) {
-            pickBlock = NetworkTools.readItemStack(buf);
-        } else {
-            pickBlock = ItemStack.EMPTY;
-        }
+        pickBlock = ByteBufUtils.readItemStack(buf);
     }
 
     @Override
@@ -75,11 +73,14 @@ public class PacketGetInfo implements IMessage {
             buf.writeDouble(hitVec.y);
             buf.writeDouble(hitVec.z);
         }
-        if (pickBlock.isEmpty()) {
-            buf.writeBoolean(false);
+
+        ByteBuf buffer = Unpooled.buffer();
+        ByteBufUtils.writeItemStack(buffer, pickBlock);
+        if (buffer.writerIndex() <= Config.maxPacketToServer) {
+            buf.writeBytes(buffer);
         } else {
-            buf.writeBoolean(true);
-            NetworkTools.writeItemStack(buf, pickBlock);
+            ItemStack copy = new ItemStack(pickBlock.getItem(), pickBlock.getCount(), pickBlock.getMetadata());
+            ByteBufUtils.writeItemStack(buf, copy);
         }
     }
 
